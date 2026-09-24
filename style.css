@@ -92,7 +92,7 @@ h1 {
 .arena-panel {
   padding: 12px;
   border: 1px solid var(--panel-border);
-  background: linear-gradient(180deg, rgba(24, 41, 35, 0.9), rgba(8, 17, 14, 0.92));
+  background: linear-gradient(180deg, rgba(34, 52, 43, 0.9), rgba(11, 20, 17, 0.96));
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
 }
 
@@ -100,8 +100,8 @@ h1 {
   display: block;
   width: 100%;
   height: auto;
-  border: 1px solid rgba(127, 169, 141, 0.2);
-  background: #14271f;
+  border: 1px solid rgba(162, 200, 180, 0.35);
+  background: #12251d;
   cursor: crosshair;
 }
 

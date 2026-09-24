@@ -105,7 +105,6 @@ function buildTower(site) {
 }
 
 function spawnZombie() {
-  const waveBoost = wave * 1.15;
   const roll = Math.random();
   let type = 'walker';
   if (wave >= 3 && roll > 0.8) type = 'brute';
@@ -346,10 +345,10 @@ function retryRun() {
 }
 
 function drawBoard() {
-  const tileW = 70;
-  const tileH = 35;
-  const originX = 150;
-  const originY = 110;
+  const tileW = 72;
+  const tileH = 36;
+  const originX = 120;
+  const originY = 120;
 
   for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 10; col++) {
@@ -363,25 +362,26 @@ function drawBoard() {
       ctx.lineTo(x - tileW / 2, y);
       ctx.closePath();
 
-      const pathCell = path.find((p) => {
+      const onPath = path.some((p) => {
         const px = Math.round((p.x - originX) / (tileW / 2));
         const py = Math.round((p.y - originY) / (tileH / 2));
-        return px === col - row && py === col + row;
+        return px === (col - row) && py === (col + row);
       });
 
-      ctx.fillStyle = pathCell ? '#2d463a' : '#1c312a';
+      ctx.fillStyle = onPath ? '#3a573b' : '#1a2d26';
       ctx.fill();
-      ctx.strokeStyle = pathCell ? '#586d5c' : '#244234';
+      ctx.strokeStyle = onPath ? '#7f8d50' : '#244336';
+      ctx.lineWidth = 1.5;
       ctx.stroke();
     }
   }
 
-  ctx.fillStyle = '#0f1b17';
-  ctx.fillRect(860, 250, 70, 90);
-  ctx.fillStyle = '#6f8a78';
-  ctx.fillRect(875, 280, 40, 35);
-  ctx.fillStyle = '#d9c6a5';
-  ctx.fillRect(890, 250, 10, 35);
+  ctx.fillStyle = '#12251d';
+  ctx.fillRect(860, 240, 80, 110);
+  ctx.fillStyle = '#6d8b70';
+  ctx.fillRect(878, 268, 44, 42);
+  ctx.fillStyle = '#d7b980';
+  ctx.fillRect(892, 246, 16, 28);
 }
 
 function drawBuildSites() {
@@ -389,10 +389,10 @@ function drawBuildSites() {
     const occupied = towers.some((tower) => Math.hypot(tower.x - site.x, tower.y - site.y) < 22);
     ctx.beginPath();
     ctx.arc(site.x, site.y, 18, 0, Math.PI * 2);
-    ctx.fillStyle = occupied ? 'rgba(80, 120, 102, 0.6)' : 'rgba(255, 196, 92, 0.22)';
+    ctx.fillStyle = occupied ? 'rgba(120, 200, 145, 0.75)' : 'rgba(245, 186, 95, 0.42)';
     ctx.fill();
-    ctx.strokeStyle = occupied ? '#7be69a' : '#e0b15e';
-    ctx.setLineDash([5, 6]);
+    ctx.strokeStyle = occupied ? '#aaf0b1' : '#f0c873';
+    ctx.setLineDash([6, 6]);
     ctx.stroke();
     ctx.setLineDash([]);
   });
@@ -400,23 +400,21 @@ function drawBuildSites() {
 
 function drawPath() {
   ctx.beginPath();
-  for (let i = 0; i < path.length; i += 1) {
-    const p = path[i];
+  path.forEach((p, i) => {
     if (i === 0) ctx.moveTo(p.x, p.y);
     else ctx.lineTo(p.x, p.y);
-  }
-  ctx.strokeStyle = '#7a6b3a';
-  ctx.lineWidth = 32;
+  });
+  ctx.strokeStyle = '#d9b45a';
+  ctx.lineWidth = 26;
   ctx.stroke();
 
   ctx.beginPath();
-  for (let i = 0; i < path.length; i += 1) {
-    const p = path[i];
+  path.forEach((p, i) => {
     if (i === 0) ctx.moveTo(p.x, p.y);
     else ctx.lineTo(p.x, p.y);
-  }
-  ctx.strokeStyle = '#b08f43';
-  ctx.lineWidth = 16;
+  });
+  ctx.strokeStyle = '#8d7342';
+  ctx.lineWidth = 12;
   ctx.stroke();
 }
 
@@ -431,14 +429,14 @@ function drawTower(tower) {
   ctx.fillStyle = color;
   ctx.fillRect(tower.x - 8, tower.y - 8, 16, 24);
 
-  ctx.fillStyle = '#dfefff';
+  ctx.fillStyle = '#e6f6ff';
   ctx.beginPath();
   ctx.arc(tower.x, tower.y - 10, 9, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.beginPath();
   ctx.arc(tower.x, tower.y - 10, 14, 0, Math.PI * 2);
-  ctx.strokeStyle = tower.hitFlash > 0 ? '#ffffff' : 'rgba(255,255,255,0.25)';
+  ctx.strokeStyle = tower.hitFlash > 0 ? '#ffffff' : 'rgba(255,255,255,0.4)';
   ctx.lineWidth = 2;
   ctx.stroke();
 }
@@ -496,6 +494,8 @@ function drawKeep() {
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#0d1714';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   drawBoard();
   drawPath();
   drawBuildSites();

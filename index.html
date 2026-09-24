@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nightfall Keep</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">TACTICAL DEFENSE // SECTOR 07</p>
+        <h1>Nightfall Keep</h1>
+      </div>
+      <div class="stats">
+        <div><span>WAVE</span><strong id="wave">1</strong></div>
+        <div><span>GOLD</span><strong id="gold">100</strong></div>
+        <div><span>KEEP HP</span><strong id="hp">100</strong></div>
+      </div>
+    </header>
+
+    <section class="game-wrap">
+      <canvas id="game" width="960" height="600" aria-label="Top-down tower defense game"></canvas>
+      <aside class="panel">
+        <div class="panel-title"><span class="status-dot"></span> COMMAND DECK</div>
+        <p class="help">Place archers on the glowing build pads. They automatically target the closest zombie.</p>
+        <button id="startWave" class="primary">START WAVE <span>▶</span></button>
+        <button id="volley" class="ability" disabled><b>VOLLEY</b><small>Rain arrows on every enemy · Q</small><em id="volleyCost">40 gold</em></button>
+        <button id="frost" class="ability" disabled><b>FROST TRAP</b><small>Slow all zombies for 5 seconds · E</small><em>30 gold</em></button>
+        <div class="legend">
+          <p><i class="archer-key"></i> Archer tower</p>
+          <p><i class="zombie-key"></i> Zombie</p>
+          <p><i class="pad-key"></i> Empty build pad · 50 gold</p>
+        </div>
+        <div id="message" class="message">Build your defense, then start the wave.</div>
+      </aside>
+    </section>
+    <footer>CLICK A BUILD PAD TO RECRUIT AN ARCHER <span>•</span> Q: VOLLEY <span>•</span> E: FROST TRAP</footer>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>

@@ -16,6 +16,7 @@ let wave = 1;
 let runningWave = false;
 let waveQueue = 0;
 let spawnTimer = 0;
+let hoveredSite = null;
 
 const TOWER_DEFS = {
   scout: { label: 'Scout', cost: 50, damage: 12, range: 150, fireRate: 0.62, color: '#7be69a', projectile: '#dfffe3' },
@@ -59,7 +60,6 @@ function updateHUD() {
   waveEl.textContent = wave;
   goldEl.textContent = gold;
   hpEl.textContent = keepHp;
-
   abilityVolley.disabled = gold < 40 || !runningWave;
   abilityFreeze.disabled = gold < 35 || !runningWave;
 }
@@ -344,7 +344,29 @@ function retryRun() {
   updateHUD();
 }
 
+function drawGround() {
+  ctx.fillStyle = '#0f1b17';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  for (let y = 0; y < canvas.height; y += 54) {
+    for (let x = 0; x < canvas.width; x += 54) {
+      ctx.fillStyle = ((x / 54 + y / 54) % 2 === 0) ? '#173026' : '#122821';
+      ctx.fillRect(x, y, 54, 54);
+    }
+  }
+
+  ctx.fillStyle = '#244334';
+  for (let i = 0; i < 14; i++) {
+    const px = 30 + (i * 67) % canvas.width;
+    const py = 40 + (i * 83) % (canvas.height - 80);
+    ctx.fillRect(px, py, 8, 8);
+    ctx.fillRect(px + 16, py + 12, 6, 6);
+  }
+}
+
 function drawBoard() {
+  drawGround();
+
   const tileW = 72;
   const tileH = 36;
   const originX = 120;
@@ -368,20 +390,13 @@ function drawBoard() {
         return px === (col - row) && py === (col + row);
       });
 
-      ctx.fillStyle = onPath ? '#3a573b' : '#1a2d26';
+      ctx.fillStyle = onPath ? '#3b5a3d' : '#1d322b';
       ctx.fill();
-      ctx.strokeStyle = onPath ? '#7f8d50' : '#244336';
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = onPath ? '#98a16d' : '#2c463a';
+      ctx.lineWidth = 1.4;
       ctx.stroke();
     }
   }
-
-  ctx.fillStyle = '#12251d';
-  ctx.fillRect(860, 240, 80, 110);
-  ctx.fillStyle = '#6d8b70';
-  ctx.fillRect(878, 268, 44, 42);
-  ctx.fillStyle = '#d7b980';
-  ctx.fillRect(892, 246, 16, 28);
 }
 
 function drawBuildSites() {
@@ -418,18 +433,30 @@ function drawPath() {
   ctx.stroke();
 }
 
+function drawRangePreview() {
+  if (!hoveredSite) return;
+  const def = TOWER_DEFS[selectedTower];
+  ctx.beginPath();
+  ctx.arc(hoveredSite.x, hoveredSite.y, def.range, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(123, 230, 154, 0.45)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([7, 8]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
 function drawTower(tower) {
   const color = tower.def.color;
 
-  ctx.fillStyle = '#0b1512';
+  ctx.fillStyle = 'rgba(11, 21, 18, 0.9)';
   ctx.beginPath();
-  ctx.ellipse(tower.x, tower.y + 14, 20, 8, 0, 0, Math.PI * 2);
+  ctx.ellipse(tower.x, tower.y + 14, 22, 9, 0, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.fillStyle = color;
   ctx.fillRect(tower.x - 8, tower.y - 8, 16, 24);
 
-  ctx.fillStyle = '#e6f6ff';
+  ctx.fillStyle = '#eef9ff';
   ctx.beginPath();
   ctx.arc(tower.x, tower.y - 10, 9, 0, Math.PI * 2);
   ctx.fill();
@@ -438,6 +465,12 @@ function drawTower(tower) {
   ctx.arc(tower.x, tower.y - 10, 14, 0, Math.PI * 2);
   ctx.strokeStyle = tower.hitFlash > 0 ? '#ffffff' : 'rgba(255,255,255,0.4)';
   ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(tower.x, tower.y, tower.def.range, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
   ctx.stroke();
 }
 
@@ -451,6 +484,15 @@ function drawZombie(zombie) {
   ctx.fillStyle = '#1a1715';
   ctx.fillRect(zombie.x - 7, zombie.y - 3, 4, 4);
   ctx.fillRect(zombie.x + 3, zombie.y - 3, 4, 4);
+
+  if (zombie.type === 'runner') {
+    ctx.strokeStyle = '#fbd67e';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(zombie.x - zombie.radius, zombie.y + 8);
+    ctx.lineTo(zombie.x + zombie.radius, zombie.y + 8);
+    ctx.stroke();
+  }
 
   const barW = zombie.radius * 2;
   const hpRatio = Math.max(0, zombie.hp / zombie.maxHp);
@@ -490,15 +532,18 @@ function drawKeep() {
   ctx.fillRect(keepX - 10, keepY - 40, 20, 24);
   ctx.fillStyle = '#dfb872';
   ctx.fillRect(keepX - 20, keepY + 20, 40, 12);
+
+  ctx.strokeStyle = 'rgba(255, 229, 159, 0.36)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(keepX - 34, keepY - 25, 68, 76);
 }
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#0d1714';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
   drawBoard();
-  drawPath();
   drawBuildSites();
+  drawPath();
+  drawRangePreview();
   drawKeep();
   towers.forEach(drawTower);
   zombies.forEach(drawZombie);
@@ -522,6 +567,19 @@ function gameLoop(timestamp) {
   draw();
   requestAnimationFrame(gameLoop);
 }
+
+canvas.addEventListener('mousemove', (event) => {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const x = (event.clientX - rect.left) * scaleX;
+  const y = (event.clientY - rect.top) * scaleY;
+  hoveredSite = findBuildSiteAt(x, y);
+});
+
+canvas.addEventListener('mouseleave', () => {
+  hoveredSite = null;
+});
 
 canvas.addEventListener('click', (event) => {
   const rect = canvas.getBoundingClientRect();
